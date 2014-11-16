@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>University of Cincinnati Parking</title>
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="jumbotron.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Google Maps API -->
+	<style type="text/css">
+      html, body, #map-canvas { height: 500px; margin: 0; padding: 0;}
+    </style>
+
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAL1c4q2u6r4TwdEa36-6SrjdAvFZt3nfg">
+    </script>
+
+    <script type="text/javascript" src="sprintf.js">
+    </script>
+
+    <script type="text/javascript">
+
+      var markers = [];
+
+      function initialize() {
+
+        var mapOptions = {
+          center: { lat: 39.1320, lng: -84.5155},
+          zoom: 15,
+          scrollwheel: false,
+        };
+
+        var map = new google.maps.Map(document.getElementById('map-canvas'),
+            mapOptions);
+
+        var myLatLng1 = new google.maps.LatLng(39.135445,-84.521911);
+        var myLatLng2 = new google.maps.LatLng(39.127302, -84.520388);
+        var myLatLng3 = new google.maps.LatLng(39.132491, -84.510142);
+
+        var marker1 = new google.maps.Marker({
+      		position: myLatLng1,
+      		map: map,
+      		title: '435-439 Riddle Rd',
+      		open: true,
+      		deviceId: "55ff70065075555329431787",
+      		icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+  		});
+
+  	   var marker2 = new google.maps.Marker({
+      		position: myLatLng2,
+      		map: map,
+      		title: '2380 Wheeler St',
+      		open: true,
+      		deviceId: "54ff73066667515149361367",
+      		icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+  		});
+
+  		var marker3 = new google.maps.Marker({
+      		position: myLatLng3,
+      		map: map,
+      		title: '2823 Glendora Ave',
+      		open: true,
+      		deviceId: "53ff70065075535113331387",
+      		icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+  		});
+
+  		var overlayGenerator = function(marker) {
+  			return function () {
+		      	var outputString = "";
+		      	if (marker.open) { 
+		      		outputString = "<p><strong>Parking spot is open!</strong></p>" +
+		      			"<p>" + marker.title + "</p>";
+		      	} else {
+		      		outputString = "<p><strong>Parking spot is closed.</strong></p>" +
+		      			"<p>" + marker.title + "</p>";
+		      	}
+
+		      	var contentString = "<div id='content'>" +
+		      		outputString +
+		      		"</div>";
+
+		      	var infowindow = new google.maps.InfoWindow({
+		      		content: contentString
+		  		});
+		    	infowindow.open(map, marker);
+  			}
+  		};
+
+  		google.maps.event.addListener(marker1, 'click', overlayGenerator(marker1));
+  		google.maps.event.addListener(marker2, 'click', overlayGenerator(marker2));
+  		google.maps.event.addListener(marker3, 'click', overlayGenerator(marker3));
+        
+        markers.push(marker1);
+        markers.push(marker2);
+        markers.push(marker3);
+      }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+
+    <script>
+    	var GET_ADDRESS_FORMAT = "https://api.spark.io/v1/devices/%s/buttonPresse?access_token=44c73e488bd939af04dc6886f03ecf3923d7146d";
+
+    	function updateMarkers() {
+    		for (var i = 0; i < markers.length; i++) {
+	    			var updateMarker = function () {
+	    				var currentMarker = markers[i];
+	    				$.get( sprintf(GET_ADDRESS_FORMAT, currentMarker.deviceId), function( data ) {
+	 					 	if (data.result) {
+	 					 		currentMarker.setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
+	 					 		currentMarker.open = false;
+	 					 	}
+	 					 	else {
+	 					 		currentMarker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+	 					 		currentMarker.open = true;
+	 					 	}
+	 					});
+	 			    };
+	 			    updateMarker();
+			};
+    		setTimeout(updateMarkers, 1000);
+    	}
+
+    	setTimeout(function () {
+    		updateMarkers();
+    	}, 1000);
+
+    </script>
+
+
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">UC Parking</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          
+        </div><!--/.navbar-collapse -->
+      </div>
+    </nav>
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+       <div id="map-canvas"></div>
+    </div>
+
+    <div class="container">
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="col-md-4">
+          <h2>Parking</h2>
+          <p>Find the closest parking spot to the center of campus today.  It's magic!</p>
+        </div>
+        <div class="col-md-4">
+          <h2>How Does It Work?</h2>
+          <p>Parterning up with the city, we placed sensors on all the side parking spots around the University of Cincinnati.  When cars park there, the sensor is triggered, and we know that a car has been parked there.  The companion mobile app allows to find the open parking spots closest to campus, saving you time!</p>
+       </div>
+        <div class="col-md-4">
+          <h2>Download the App Today</h2>
+          <p>Download the app on the App Store or Android Marketplace (coming soon)</p>
+        </div>
+      </div>
+
+      <hr>
+
+      <footer>
+        <p>&copy; Company 2014</p>
+      </footer>
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+  </body>
+</html>
+
